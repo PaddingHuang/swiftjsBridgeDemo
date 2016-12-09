@@ -1,0 +1,414 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <title>消息中心</title>
+    </head>
+    <style>
+        html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, i, u, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, fieldset, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video{
+            margin: 0;
+            padding: 0;
+            border: 0;
+            vertical-align: baseline;
+            font: inherit;
+            font-size: 100%;
+        }
+        div{
+            color:#000;
+        }
+        #removeable{
+            width:100%;
+            height:auto;
+            overflow-y: scroll;
+        }
+        .title{
+            width:100%;
+            background-color: #ffa82c;
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color:#fff;
+            position: fixed;
+            z-index: 999;
+        }
+        .message-item-div {
+            margin: 10px 15px 10px 15px;
+            background-color: white;
+            border: 1px solid #D9D9D9;
+            font-size: 16px;
+        }
+        .msg-content {
+            font-weight: bold;
+            margin: 10px;
+        }
+        .message-content {
+            margin: 10px;
+            font-size: 15px;
+        }
+        .message-content-main {
+            color: #2F4F4F;
+        }
+        .message-content-danger {
+            color: red;
+        }
+        .more{
+            width:100%;
+            text-align: center;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .delete{
+            width: 18px;
+            height: 18px;
+            background: url("delete_gray.png");
+            background-size: 100%;
+            float: right;
+            font-weight: 100;
+            color: #999;
+        }
+        .mb{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #ccc;
+            filter:alpha(opacity=50); /*IE滤镜，透明度50%*/
+            -moz-opacity:0.5; /*Firefox私有，透明度50%*/
+            opacity:0.5;/*其他，透明度50%*/
+            z-index: 999;
+        }
+        .mb_c{
+            margin-top: 60%;
+            width: 100%;
+            position: absolute;
+            left: 45%;
+        }
+        .mb_c p{
+            width: 100%;
+            float: left;
+            position: relative;
+            top:5px;
+            right: 30px;
+        }
+        #circular{
+            width: 64px;
+        }
+        .circular{
+            background-color:#ffa82c;
+            float:left;
+            width:15px;
+            height:15px;
+            -webkit-border-radius:10px;
+            -moz-border-radius:10px;
+            -webkit-animation-name: bounce_circular;
+            -webkit-animation-duration: 0.7s;
+            -webkit-animation-iteration-count: infinite;
+            -webkit-animation-direction: linear;
+        }
+        #circular_1{
+            margin-top:25px;
+            -webkit-animation-delay: .3s;
+        }
+        #circular_2{
+            margin-left:-8px;
+            margin-top:9px;
+            -webkit-animation-delay: .4s;
+        }
+        #circular_3{
+            margin-top:1px;
+            -webkit-animation-delay: .5s;
+        }
+        #circular_4{
+            margin-left:0;
+            margin-top:9px;
+            -webkit-animation-delay: .6s;
+        }
+        #circular_5{
+            margin-left:-8px;
+            margin-top:25px;
+            -webkit-animation-delay: .7s;
+        }
+        #circular_6{
+            margin-left:-22px;
+            margin-top:40px;
+            -webkit-animation-delay: .8s;
+        }
+        #circular_7{
+            margin-left:-37px;
+            margin-top:48px;
+            -webkit-animation-delay: .9s;
+        }
+        #circular_8{
+            margin-left:-53px;
+            margin-top:41px;
+            -webkit-animation-delay: 1s;
+        }
+        .item{
+            margin-top: 3px;
+            margin-bottom: 3px;
+        }
+        @-webkit-keyframes bounce_circular{
+            0%{-webkit-transform:scale(1);}
+            100%{-webkit-transform:scale(.3);}
+        }
+        @keyframes bounce_circular{
+            0%{-webkit-transform:scale(1);}
+            100%{-webkit-transform:scale(.3);}
+        }
+    </style>
+    <body>
+   
+
+        <!--加载中模板-->
+        <div id="mbs" class="mb" style="display: none;">
+            <div class="mb_c">
+                <div id="circular" class="marginLeft">
+                    <div id="circular_1" class="circular"></div>
+                    <div id="circular_2" class="circular"></div>
+                    <div id="circular_3" class="circular"></div>
+                    <div id="circular_4" class="circular"></div>
+                    <div id="circular_5" class="circular"></div>
+                    <div id="circular_6" class="circular"></div>
+                    <div id="circular_7" class="circular"></div>
+                    <div id="circular_8" class="circular"></div>
+                    <div class="clearfix"></div>
+                </div>
+                <p>加载中,请稍等……</p>
+            </div>
+        </div>
+        <div class="title">消息中心</div>
+        <div id="notice" style="position: absolute;overflow-y:auto;top: 8%;padding-bottom:5px">
+            <div class="content" id="js-content">App调用js函数执行回调时 内容会改变</div>
+        </div>
+        </div>
+     
+    </body>
+    <script id="msg_mon" type="text/template">
+        <div class='message-item-div'>
+            <div class='msg-content'>##content##<a class='delete' onclick='DeleteItem(this)'></a></div>
+            <div class='message-content'>##desc##</div>
+        </div>
+    </script>
+    <script id="msg_veh" type="text/template">
+        <div class='message-item-div'>
+            <div class='msg-content'>##content##<a class='delete' onclick='DeleteItem(this)'></a></div>
+            <div class='message-content'>
+                <div class='message-content'>
+                    <div class="item">号牌号码：<span class='message-content-main'>##hphm##</span></div>
+                    <div class="item">违章地址：<span class='message-content-main'>##wfdz##</span></div>
+                    <div class="item">违章时间：<span class='message-content-main'>##wfsj##</span></div>
+                    <div class="item">罚款金额：<span class='message-content-danger'>##fkje##</span></div>
+                    <div class="item">违章扣分：<span class='message-content-danger'>##wfjfs##</span></div>
+                    <div class="item">违章内容：<span class='message-content-main'>##wfnr##</span></div>
+                    <div class="item">违章状态：<span class='message-content-main'>##clbj##</span></div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script>
+        WebViewJavascriptBridge.load('info');
+        var notice=document.getElementById("notice");
+        var more="<div class='more' id='more' onclick='GetRes(1)'>︾点击加载更多︾</div>";
+        //数据架构
+        function info(content){
+              document.getElementById('js-content').innerHTML = "App调用js回调函数啦， 我是" + content['name'];
+            console.log(content['name']);
+            content=JSON.parse(JSON.parse(content));
+            var msg_mon = document.getElementById('msg_mon').innerHTML;
+            var msg_veh = document.getElementById('msg_veh').innerHTML;
+            var str = '';
+            for(var i= 0,len=content.length;i<len;i++){
+                    if(content[i].option.clbj=="0"){
+                        content[i].option.clbj="未处理";
+                    }else{
+                        content[i].option.clbj="已处理";
+                    }
+                    var v=content[i],tp;
+                    if(content[i].type=="MON-WARN"){
+                        tp = msg_mon;
+                        tp = tp.replace(/##content##/g,v.content);
+                        tp = tp.replace(/##desc##/g,v.option.desc);
+                    }else{
+                        tp = msg_veh;
+                        tp = tp.replace(/##content##/g,v.content);
+                        tp = tp.replace(/##hphm##/g,v.option.hphm);
+                        tp = tp.replace(/##wfdz##/g,v.option.wfdz);
+                        tp = tp.replace(/##wfsj##/g,v.option.wfsj);
+                        tp = tp.replace(/##fkje##/g,v.option.fkje);
+                        tp = tp.replace(/##wfjfs##/g,v.option.wfjfs);
+                        tp = tp.replace(/##wfnr##/g,v.option.wfnr);
+                        tp = tp.replace(/##clbj##/g,v.option.clbj);
+                    }
+                    str += tp;
+                LoadHide();
+            }
+            notice.innerHTML+=str;
+            notice.innerHTML+=more;
+        }
+        function connectWebViewJavascriptBridge(callback) {
+            if (window.WebViewJavascriptBridge) {
+                callback(WebViewJavascriptBridge)
+            } else {
+                document.addEventListener(
+                    'WebViewJavascriptBridgeReady'
+                    , function() {
+                        callback(WebViewJavascriptBridge)
+                    },
+                    false
+                );
+            }
+        }
+
+        connectWebViewJavascriptBridge(function(bridge) {
+            bridge.init(function(message, responseCallback) {
+                console.log('JS got a message', message);
+                var data = {
+                    'Javascript Responds': '测试中文!'
+                };
+                console.log('JS responding with', data);
+                responseCallback(data);
+            });
+            //第一次获取安卓推送数据
+            bridge.registerHandler("functionInJs", function(data, responseCallback) {
+                info(data);
+                var responseData = "Javascript Says Right back aka!";
+                responseCallback(responseData);
+            });
+        });
+        //获取数据
+        function GetRes(num){
+            LoadShow();
+            //分页
+            var page = sessionStorage.getItem("page");
+            if(page==null){
+                page=num;
+                sessionStorage.setItem("page",num);
+            }else{
+                page++;
+                sessionStorage.setItem("page",page);
+            }
+            //去掉多余“加载更多”
+            var x=document.getElementById("more");
+            if(x!=null)x.remove(x);
+            //从安卓上获取数据
+            window.WebViewJavascriptBridge.callHandler(
+                    'submitFromWeb'
+                    , {'param': '请求下一页','page':page,'pageSize':'10'}
+                    , function(responseData) {
+                        info(responseData);
+                    }
+            );
+            //测试数据
+//            if(page==1){
+//                info(res1.body);
+//            }else{
+//                info(res2.body);
+//            }
+        }
+        var deletes=document.getElementsByClassName("delete");
+        //删除数据
+        function DeleteItem(n){
+            var f=n.parentNode.parentNode;//获取点击按钮父元素
+            f.parentNode.removeChild(f);
+        }
+        function LoadShow(){
+            document.getElementById("mbs").style.display="block";
+        }
+        function LoadHide(){
+            document.getElementById("mbs").style.display="none";
+        }
+//        var res1={
+//            "header": {
+//                "code": 0
+//            },
+//            "body": [
+//                {
+//                    "content": "月初汇总提醒",
+//                    "id": "15058367",
+//                    "image": "",
+//                    "option": {
+//                        "desc": "<table style='LINE-HEIGHT: 26px'><tr><td><span style='color:#000000'>驾驶证号：</span><span style='color:#000000'>4305241987****5970</span></td></tr><tr><td><span style='color:#000000'>温馨提示：</span><span style='color:#000000'>您的驾驶证截止到<span style='color:red'>2016-12-06</span>日累计扣<span style='color:red'>2</span>分，请注意积分变化。</span></td></tr></table>"
+//                    },
+//                    "phone": "18275355534",
+//                    "redirect": "",
+//                    "time": "2016-12-06 11:07:52",
+//                    "type": "MON-WARN"
+//                },
+//                {
+//                    "content": "月初汇总提醒",
+//                    "id": "15058368",
+//                    "image": "",
+//                    "option": {
+//                        "desc": "<table style='LINE-HEIGHT: 26px'><tr><td><span style='color:#000000'>驾驶证号：</span><span style='color:#000000'>5201121990****0013</span></td></tr><tr><td><span style='color:#000000'>温馨提示：</span><span style='color:#000000'>您的驾驶证截止到<span style='color:red'>2016-12-06</span>日累计扣<span style='color:red'>6</span>分，请注意积分变化。</span></td></tr></table>"
+//                    },
+//                    "phone": "18275355534",
+//                    "redirect": "",
+//                    "time": "2016-12-06 11:07:52",
+//                    "type": "MON-WARN"
+//                }
+//            ]
+//        };
+//        var res2={
+//            "header": {
+//                "code": 0
+//            },
+//            "body": [
+//                {
+//                    "content": "交款提醒",
+//                    "id": "14694855",
+//                    "image": "",
+//                    "option": {
+//                        "desc": "<font color='#000000'><div style='line-height: 24px'>驾驶证号：<font color='#2F4F4F'>5123221970****2975</font><div>号牌号码：<font color='#2F4F4F'>贵JNF766</font></div><div>决定书号：<font color='red'>5201001329339880</font></div><div>处理机构：<font color='red'>贵阳市公安交通管理局交通科技处</font></div><div>温馨提示：<font color='#2F4F4F'>您于2016-11-22 18:18处理的违章将在2016-12-07产生滞纳金，请尽快缴纳罚款(如已交款，请忽略此信息)，您也可以使用车行无忧代缴罚款哦！</font></div></div></font>"
+//                    },
+//                    "phone": "18275355534",
+//                    "redirect": "2|5201001329339880",
+//                    "time": "2016-11-29 15:01:01",
+//                    "type": "MON-WARN"
+//                },
+//                {
+//                    "content": "车辆违章对账提醒",
+//                    "id": "14671299",
+//                    "image": null,
+//                    "option": {
+//                        "clbj": "1",
+//                        "fdjh": "",
+//                        "fkje": "50",
+//                        "hphm": "贵B52156",
+//                        "hpzl": "01",
+//                        "wfbh": "5202052016151801761621",
+//                        "wfdz": "致富路机修转盘路段50米",
+//                        "wfjfs": "0",
+//                        "wfnr": "在车门、车厢没有关好时行车的",
+//                        "wfsj": "2016-11-16 10:15",
+//                        "wfxw": "10750"
+//                    },
+//                    "phone": "18275355534",
+//                    "redirect": "",
+//                    "time": "2016-11-28 11:23:17",
+//                    "type": "VEH-ILLEGAL"
+//                },
+//                {
+//                    "content": "驾驶证违章处理提醒",
+//                    "id": "14575704",
+//                    "image": null,
+//                    "option": {
+//                        "clbj": "1",
+//                        "fkje": "50",
+//                        "hphm": "贵JNF766",
+//                        "wfbh": "5201002016101329339881",
+//                        "wfdz": "解放路",
+//                        "wfjfs": "0",
+//                        "wfnr": "违反禁令标志指示",
+//                        "wfsj": "2016-10-20 07:55",
+//                        "wfxw": "13440"
+//                    },
+//                    "phone": "18275355534",
+//                    "redirect": "",
+//                    "time": "2016-11-23 12:18:00",
+//                    "type": "VEH-ILLEGAL"
+//                }
+//            ]
+//        };
+    </script>
+
+</html>
